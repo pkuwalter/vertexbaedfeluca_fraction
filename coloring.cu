@@ -788,3 +788,136 @@ void mixColor(const int n_vertices,
     cudaFree(dev_undone);
     free(undone);
 }
+
+void colorByVertexOnGPU(const int n_vertices, 
+                const int n_edges, 
+                const int *row_ptr, 
+                const int *col, 
+                const int * col_ptr, 
+                const int * row,
+                const int niters,
+                const float fraction, 
+                int *colors) 
+{
+    //thrust::fill(colors, colors + n_vertices, -1); // init colors to -1
+    int init_num_colors = 100;
+    for (int i = 0; i < n_vertices; ++i)
+       colors[i] = rand() % init_num_colors;
+
+    int * colors2 = (int*)malloc(sizeof(int) * n_vertices);
+
+    struct timeval start_time, end_time;
+
+    int * dev_row_ptr;
+    int * dev_col;
+    int * dev_col_ptr;
+    int * dev_row;
+    int * dev_colors;
+    int * dev_colors2;
+    int * dev_continue_flag;
+
+    int * undone;
+    int * dev_undone;
+
+
+    undone = (int *)malloc(sizeof(int) * n_vertices);
+    memset(undone, 0, sizeof(int) * n_vertices);
+
+    cudaMalloc(&dev_row_ptr, sizeof(int) * (n_vertices + 1));
+    cudaMalloc(&dev_col, sizeof(int) * n_edges);
+    cudaMalloc(&dev_col_ptr, sizeof(int) * (n_vertices + 1));
+    cudaMalloc(&dev_row, sizeof(int) * n_edges);
+    cudaMalloc(&dev_colors, sizeof(int) * n_vertices);
+    cudaMalloc(&dev_colors2, sizeof(int) * n_vertices);
+    cudaMalloc(&dev_continue_flag, sizeof(int));
+    cudaMalloc(&dev_undone, sizeof(int) * n_vertices);
+
+
+    cudaMemcpy(dev_row_ptr, row_ptr, sizeof(int) * (n_vertices + 1), cudaMemcpyHostToDevice);
+    cudaMemcpy(dev_col, col, sizeof(int) * n_edges, cudaMemcpyHostToDevice);
+    cudaMemcpy(dev_col_ptr, col_ptr, sizeof(int) * (n_vertices + 1), cudaMemcpyHostToDevice);
+    cudaMemcpy(dev_row, row, sizeof(int) * n_edges, cudaMemcpyHostToDevice);
+    cudaMemcpy(dev_colors, colors, sizeof(int) * n_vertices, cudaMemcpyHostToDevice);
+    cudaMemcpy(dev_undone, undone, sizeof(int) * n_vertices, cudaMemcpyHostToDevice);
+    
+    int continue_flag = 1;
+
+    int turn_f = 0;
+    int new_c = init_num_colors;
+
+    int iter = 0;
+    float kernel_time = 0;
+    while(continue_flag) {
+        gettimeofday(&start_time, NULL);
+        turn_f = turn_f ? 0 : 1;
+        cudaMemset(dev_continue_flag, 0, sizeof(int));
+        int nt = 256;
+        int nb = (n_vertices + nt - 1)/nt; 
+        color_kernel<<<nb, nt>>>(n_vertices, new_c,
+                                    dev_row_ptr, dev_col,
+                                    dev_col_ptr, dev_row,
+                                    (turn_f? dev_colors: dev_colors2), 
+                                    (turn_f? dev_colors2: dev_colors),
+                                    dev_continue_flag);
+        cudaMemcpy(&continue_flag, dev_continue_flag, sizeof(int), cudaMemcpyDeviceToHost);
+        new_c++;
+        if (new_c % 100 == 0) {
+            std::cout << "num_colors=" << new_c << ", ";
+            cudaMemcpy(colors, (turn_f?dev_colors2: dev_colors), sizeof(int) * n_vertices, cudaMemcpyDeviceToHost);
+            cudaMemcpy(colors, dev_colors, sizeof(int) * n_vertices, cudaMemcpyDeviceToHost);
+            cudaMemcpy(colors2, dev_colors2, sizeof(int) * n_vertices, cudaMemcpyDeviceToHost);
+            std::cout << "num_finshed=" << num_finished(n_vertices, row_ptr, col, col_ptr, row, colors) << ", "
+                      << "compare=" << compare(n_vertices, colors, colors2) << std::endl;
+        }
+
+        gettimeofday(&end_time, NULL);
+        
+        float time = elapsed(start_time, end_time);
+        kernel_time += time;
+
+        cudaMemcpy(undone, dev_undone, sizeof(int) * n_vertices, cudaMemcpyDeviceToHost);
+        int num_undone = std::count(undone, undone + n_vertices, 1);
+
+        iter++;
+        if (niters > 0 && iter >= niters) break;
+        if (fraction > 0 && (1 - (float)num_undone / n_vertices) >= fraction) break;
+
+    }
+
+
+    gettimeofday(&start_time, NULL);
+    cudaMemcpy(colors, dev_colors, sizeof(int) * n_vertices, cudaMemcpyDeviceToHost);
+    if (continue_flag)
+    {
+        cudaMemcpy(undone, dev_undone, sizeof(int) * n_vertices, cudaMemcpyDeviceToHost);
+        /***********************************************************************************
+        std::cout << "After coloring on gpu: num_CC = " << getNumCC(n_vertices, row_ptr, col, col_ptr, row, undone) << ", "
+                  << "num_undone = " << std::count(undone, undone + n_vertices, 1) << std::endl;
+        ***********************************************************************************/
+        greedyColor2(n_vertices, row_ptr, col, col_ptr, row, 1000, undone, colors) ;
+    }
+    gettimeofday(&end_time, NULL);
+    float iter_time = 0.0;
+    float trav_time = 0.0;
+    trav_time = elapsed(start_time, end_time);
+    iter_time = kernel_time;
+    //std::cout << "Greedy color time for the rest vertices: " << elapsed(start_time, end_time) << "ms" << std::endl;
+    //std::cout << "Time(without malloc & memcpy): " << kernel_time + elapsed(start_time, end_time) << "ms" << std::endl;
+    std::cout << iter_time << "\t" << trav_time << "\t";
+
+
+    gettimeofday(&end_time, NULL);
+    std::cout << "Main loop time: " << elapsed(start_time, end_time) << std::endl;
+    cudaMemcpy(colors, dev_colors, sizeof(int) * n_vertices, cudaMemcpyDeviceToHost);
+    cudaFree(dev_continue_flag);
+    cudaFree(dev_row_ptr);
+    cudaFree(dev_col);
+    cudaFree(dev_col_ptr);
+    cudaFree(dev_row);
+    cudaFree(dev_colors);
+    cudaFree(dev_colors2);
+    cudaFree(dev_undone);
+    free(undone);
+
+    free(colors2);
+}
