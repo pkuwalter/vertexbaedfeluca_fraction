@@ -55,5 +55,14 @@ void mixColor(const int n_vertices,
               const int max_iter,
               const float fraction,
               int * colors);
+void colorByVertexOnGPU(const int n_vertices, 
+                const int n_edges, 
+                const int *row_ptr, 
+                const int *col, 
+                const int * col_ptr, 
+                const int * row,
+                const int niters,
+                const float fraction, 
+                int *colors);
 
 #endif
