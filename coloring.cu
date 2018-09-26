@@ -894,7 +894,8 @@ void colorByVertexOnGPU(const int n_vertices,
         std::cout << "After coloring on gpu: num_CC = " << getNumCC(n_vertices, row_ptr, col, col_ptr, row, undone) << ", "
                   << "num_undone = " << std::count(undone, undone + n_vertices, 1) << std::endl;
         ***********************************************************************************/
-        greedyColor2(n_vertices, row_ptr, col, col_ptr, row, 1000, undone, colors) ;
+        greedyColor(n_vertices, row_ptr, col, col_ptr, row, 1000, undone, colors) ;
+        greedyColor();
     }
     gettimeofday(&end_time, NULL);
     float iter_time = 0.0;
