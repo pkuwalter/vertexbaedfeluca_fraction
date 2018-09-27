@@ -801,8 +801,12 @@ void colorByVertexOnGPU(const int n_vertices,
 {
     //thrust::fill(colors, colors + n_vertices, -1); // init colors to -1
     int init_num_colors = 100;
+    /*****************
     for (int i = 0; i < n_vertices; ++i)
        colors[i] = rand() % init_num_colors;
+   **********************/
+
+   memset(colors, 0, sizeof(int) * n_vertices);
 
     int * colors2 = (int*)malloc(sizeof(int) * n_vertices);
 
