@@ -107,26 +107,26 @@ int countColors(int *colors)
 {
     int i,j; 
     int length;
-    length=sizeof(A)/sizeof(int); 
-    int max_A=A[0]; 
+    length=sizeof(colors)/sizeof(int); 
+    int max_colors=colors[0]; 
     for(i=0;i<length;++i) 
     { 
-        if(max_A<A[i])
-            max_A=A[i];    
+        if(max_colors<colors[i])
+            max_colors=colors[i];    
     } 
-    max_A++; 
-    int hashnum[max_A];
-    for(i=0;i<max_A;++i)
+    max_colors++; 
+    int hashnum[max_colors];
+    for(i=0;i<max_colors;++i)
      hashnum[i]=0; 
     for(i=0;i<length;++i) 
     {
-        if(hashnum[A[i]]==0)
+        if(hashnum[colors[i]]==0)
         {
-            hashnum[A[i]]=1;
+            hashnum[colors[i]]=1;
         }
     } 
     int sum=0;
-    for(i=0;i<max_A;++i)
+    for(i=0;i<max_colors;++i)
         sum=sum+hashnum[i];
         return sum;
 }
