@@ -64,5 +64,12 @@ void colorByVertexOnGPU(const int n_vertices,
                 const int niters,
                 const float fraction, 
                 int *colors);
+void colorOnGPU(const int n_vertices, 
+                const int n_edges, 
+                const int *row_ptr, 
+                const int *col, 
+                const int * col_ptr, 
+                const int * row, 
+                int *colors) 
 
 #endif
