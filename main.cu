@@ -132,13 +132,16 @@ void test(const char* filename, const int start_index, const int max_iters, cons
     gettimeofday(&start_time, NULL);
     //mixColor(num_vertices, num_edges, srcs_of_edges, dsts_of_edges, row_ptr, col, col_ptr, row, max_iters, fraction, colors);
 
-    colorByVertexOnGPU(num_vertices, num_edges, row_ptr, col, col_ptr, row, max_iters, fraction, colors);
+   // colorByVertexOnGPU(num_vertices, num_edges, row_ptr, col, col_ptr, row, max_iters, fraction, colors);
                       
     gettimeofday(&end_time, NULL);
 
     std::cout << elapsed(start_time, end_time) 
               << "\t" << (isRight(num_vertices, row_ptr, col, col_ptr, row, colors) ? "right" : "wrong") << "\t" << getNumColors(num_vertices, colors) << endl;
 
+
+    colorOnGPU(num_vertices, num_edges, row_ptr, col, col_ptr, row, colors);
+ 
 /****************
     cout << "total time: " << elapsed(start_time, end_time) << "ms" << endl
          << "Solution: num_colors=" << getNumColors(num_vertices, colors) << ", "
