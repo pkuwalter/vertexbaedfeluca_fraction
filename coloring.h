@@ -70,6 +70,6 @@ void colorOnGPU(const int n_vertices,
                 const int *col, 
                 const int * col_ptr, 
                 const int * row, 
-                int *colors) 
+                int *colors);
 
 #endif
