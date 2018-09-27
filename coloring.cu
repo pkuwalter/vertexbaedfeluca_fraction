@@ -461,7 +461,9 @@ void colorOnGPU(const int n_vertices,
     }
     gettimeofday(&end_time, NULL);
     std::cout << "Main loop time: " << elapsed(start_time, end_time) << std::endl;
-    std::cout <<"Colors used for colorOnGPU "<<countColors(colors)<<countColors(colors2)<<endl;
+
+    std::cout <<"Colors used for colorOnGPU "<<countColors(colors)<<countColors(colors2)<<std::endl;
+    
     cudaMemcpy(colors, dev_colors, sizeof(int) * n_vertices, cudaMemcpyDeviceToHost);
     cudaFree(dev_continue_flag);
     cudaFree(dev_row_ptr);
@@ -621,7 +623,7 @@ void colorByEdgeOnGPU(const int n_vertices,
     std::cout << "Main loop time: " << elapsed(start_time, end_time) << std::endl;
     cudaMemcpy(colors, dev_colors, sizeof(int) * n_vertices, cudaMemcpyDeviceToHost);
 
-    std::cout <<"Colors used for colorByEdgeOnGPU "<<countColors(colors)<<endl;
+    std::cout <<"Colors used for colorByEdgeOnGPU "<<countColors(colors)<<std::endl;
 
     cudaFree(dev_continue_flag);
     cudaFree(dev_srcs);
@@ -949,8 +951,8 @@ void colorByVertexOnGPU(const int n_vertices,
     std::cout << "Main loop time: " << elapsed(start_time, end_time) << std::endl;
     cudaMemcpy(colors, dev_colors, sizeof(int) * n_vertices, cudaMemcpyDeviceToHost);
 
-    std::cout <<"Colors used for colorByVertexOnGPU "<<countColors(colors)<<endl;
-    
+    std::cout <<"Colors used for colorByVertexOnGPU "<<countColors(colors)<<std::endl;
+
     cudaFree(dev_continue_flag);
     cudaFree(dev_row_ptr);
     cudaFree(dev_col);
