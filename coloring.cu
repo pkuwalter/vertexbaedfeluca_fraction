@@ -251,7 +251,7 @@ void jplColor(const int n_vertices,
         int num_undone = std::count(colors, colors + n_vertices, -1);
         std::cout << "Iter: " << iter << " "
                   << "num_undone = " << num_undone << " " 
-                  << "time = " << time << "ms" << std::endl;
+                  << "time = " << elapsed(start_time, end_time) << "ms" << std::endl;
         iter++;
         //if (is_done == 1) break;
     }
