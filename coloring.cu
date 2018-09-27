@@ -463,7 +463,7 @@ void colorOnGPU(const int n_vertices,
     std::cout << "Main loop time: " << elapsed(start_time, end_time) << std::endl;
 
     std::cout <<"Colors used for colorOnGPU "<<countColors(colors)<<countColors(colors2)<<std::endl;
-    
+
     cudaMemcpy(colors, dev_colors, sizeof(int) * n_vertices, cudaMemcpyDeviceToHost);
     cudaFree(dev_continue_flag);
     cudaFree(dev_row_ptr);
@@ -813,6 +813,8 @@ void mixColor(const int n_vertices,
     //std::cout << "Greedy color time for the rest vertices: " << elapsed(start_time, end_time) << "ms" << std::endl;
     //std::cout << "Time(without malloc & memcpy): " << kernel_time + elapsed(start_time, end_time) << "ms" << std::endl;
     std::cout << iter_time << "\t" << trav_time << "\t";
+
+    std::cout <<"Colors used for mixColor "<<countColors(colors)<<std::endl;
 
 
 
