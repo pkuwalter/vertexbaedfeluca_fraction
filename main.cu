@@ -142,7 +142,7 @@ void test(const char* filename, const int start_index, const int max_iters, cons
 
     colorOnGPU(num_vertices, num_edges, row_ptr, col, col_ptr, row, colors);
 
-std::cout <<"==============================================================="<<endl;
+    std::cout <<"==============================================================="<<endl;
     colorByEdgeOnGPU(num_vertices,num_edges, srcs_of_edges, dsts_of_edges,  row_ptr, col,  col_ptr,  row, colors);
  
 /****************

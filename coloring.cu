@@ -102,6 +102,36 @@ inline int compare(const int n, const int * array1, const int * array2)
 	return count;
 }
 
+
+int countColors(int *colors)
+{
+    int i,j; 
+    int length;
+    length=sizeof(A)/sizeof(int); 
+    int max_A=A[0]; 
+    for(i=0;i<length;++i) 
+    { 
+        if(max_A<A[i])
+            max_A=A[i];    
+    } 
+    max_A++; 
+    int hashnum[max_A];
+    for(i=0;i<max_A;++i)
+     hashnum[i]=0; 
+    for(i=0;i<length;++i) 
+    {
+        if(hashnum[A[i]]==0)
+        {
+            hashnum[A[i]]=1;
+        }
+    } 
+    int sum=0;
+    for(i=0;i<max_A;++i)
+        sum=sum+hashnum[i];
+        return sum;
+}
+
+
 // check if all vertices are colored
 __global__ void isAllColoredKernel(const int n, const int * colors, int * ret)
 {
@@ -431,6 +461,7 @@ void colorOnGPU(const int n_vertices,
     }
     gettimeofday(&end_time, NULL);
     std::cout << "Main loop time: " << elapsed(start_time, end_time) << std::endl;
+    std::cout <<"Colors used for colorOnGPU "<<countColors(colors)<<countColors(colors2)<<endl;
     cudaMemcpy(colors, dev_colors, sizeof(int) * n_vertices, cudaMemcpyDeviceToHost);
     cudaFree(dev_continue_flag);
     cudaFree(dev_row_ptr);
@@ -589,6 +620,8 @@ void colorByEdgeOnGPU(const int n_vertices,
     gettimeofday(&end_time, NULL);
     std::cout << "Main loop time: " << elapsed(start_time, end_time) << std::endl;
     cudaMemcpy(colors, dev_colors, sizeof(int) * n_vertices, cudaMemcpyDeviceToHost);
+
+    std::cout <<"Colors used for colorByEdgeOnGPU "<<countColors(colors)<<endl;
 
     cudaFree(dev_continue_flag);
     cudaFree(dev_srcs);
@@ -915,6 +948,9 @@ void colorByVertexOnGPU(const int n_vertices,
     gettimeofday(&end_time, NULL);
     std::cout << "Main loop time: " << elapsed(start_time, end_time) << std::endl;
     cudaMemcpy(colors, dev_colors, sizeof(int) * n_vertices, cudaMemcpyDeviceToHost);
+
+    std::cout <<"Colors used for colorByVertexOnGPU "<<countColors(colors)<<endl;
+    
     cudaFree(dev_continue_flag);
     cudaFree(dev_row_ptr);
     cudaFree(dev_col);
